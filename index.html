@@ -32,12 +32,16 @@
                     <caption id="razaoSocialTitulo">Resultado da Busca</caption>
                     <thead class="thead-dark">
                       <tr>
+                        <th></th>
                         <th>Equipamento</th>
                         <th>Numero de Serie</th>
                       </tr>
                     </thead>
                     <tbody></tbody>
                   </table>
+
+                  <button type="button" class="btn btn-primary">Continuar</button>
+
             </div>
         </div>
     </div>
@@ -58,7 +62,6 @@
     firebase.initializeApp(firebaseConfig);
 
 
-
     // Função para buscar o CNPJ no Firebase
     function buscarCnpj() {
       var cnpj = document.getElementById('inputCnpj').value;
@@ -67,30 +70,30 @@
       var ref = firebase.database().ref('contratos');
 
       // Realiza a busca com o CNPJ como filtro
-      ref.orderByChild('CNPJ').equalTo(cnpj).once('value', function (snapshot) {
+      ref.orderByChild('CNPJ').equalTo(cnpj).once('value', function(snapshot) {
         var tbody = document.getElementById('resultado').getElementsByTagName('tbody')[0];
         tbody.innerHTML = '';
 
         if (snapshot.exists()) {
           var primeiraRazaoSocial = '';
-          var primeiroNomeFantasia = '';
-          snapshot.forEach(function (childSnapshot) {
+          snapshot.forEach(function(childSnapshot) {
             var contrato = childSnapshot.val();
             if (primeiraRazaoSocial === '') {
               primeiraRazaoSocial = contrato.Razao_Social;
               document.getElementById('razaoSocialTitulo').textContent = primeiraRazaoSocial;
             }
-            if (primeiroNomeFantasia === '') {
-              primeiroNomeFantasia = contrato.Nome_Fantasia;
-              document.getElementById('nomeFantasiaTitulo').textContent = primeiroNomeFantasia;
-            }
+
+            // Adiciona uma nova linha na tabela com os dados do contrato
             var row = tbody.insertRow();
-            row.insertCell(0).textContent = contrato.Descricao;
-            row.insertCell(1).textContent = contrato.id_Serie;
+            var checkboxCell = row.insertCell(0);
+            checkboxCell.innerHTML = '<input type="checkbox">';
+            var descricaoCell = row.insertCell(1);
+            descricaoCell.textContent = contrato.Descricao;
+            var idSerieCell = row.insertCell(2);
+            idSerieCell.textContent = contrato.id_Serie;
           });
         } else {
-          document.getElementById('razaoSocialTitulo').textContent = 'Nenhum resultado encontrado';
-          document.getElementById('nomeFantasiaTitulo').textContent = 'Nome Fantasia';
+          document.getElementById('razaoSocialTitulo').textContent = '';
         }
       });
     }
