@@ -1,83 +1,27 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-
-    <link rel="stylesheet" href="css/bootstrap.css">
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    
+    <title>Exemplo de Formatação e Limite de CNPJ</title>
+    <script>
+        function formatarCNPJ(cnpj) {
+            cnpj = cnpj.replace(/\D/g, ''); // Remove todos os caracteres não numéricos
+            cnpj = cnpj.replace(/^(\d{2})(\d)/g, '$1.$2'); // Insere o primeiro ponto após os 2 primeiros dígitos
+            cnpj = cnpj.replace(/^(\d{2})\.(\d{3})(\d)/g, '$1.$2.$3'); // Insere o segundo ponto após os próximos 3 dígitos
+            cnpj = cnpj.replace(/^(\d{2})\.(\d{3})\.(\d{3})(\d)/g, '$1.$2.$3/$4'); // Insere a barra após os próximos 3 dígitos
+            cnpj = cnpj.replace(/^(\d{2})\.(\d{3})\.(\d{3})\/(\d{4})(\d)/g, '$1.$2.$3/$4-$5'); // Insere o hífen após os próximos 4 dígitos
+            return cnpj;
+        }
+        
+        function limitarCNPJ(campo) {
+            if (campo.value.length > 18) {
+                campo.value = campo.value.slice(0, 18); // Limita o campo a 18 dígitos
+            }
+        }
+    </script>
 </head>
 <body>
-
-      <h1 id="nomeFantasiaTitulo">Nome Fantasia</h1>
-  <input type="text" id="inputCnpj" placeholder="Digite o CNPJ">
-  <button onclick="buscarCnpj()">Buscar</button>
-  <table id="resultado" class="table table-striped table-bordered table-hover">
-    <caption id="razaoSocialTitulo">Resultado da Busca</caption>
-    <thead class="thead-dark">
-      <tr>
-        <th>Equipamento</th>
-        <th>Numero de Serie</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
-
-  <script>
-    const firebaseConfig = { 
-        aapiKey: "AIzaSyCiafrD-bUZBMvGvZfqRKwA-GRLEtSLBPU",
-        authDomain: "bancorar-82457.firebaseapp.com",
-        databaseURL: "https://bancorar-82457-default-rtdb.firebaseio.com",
-        projectId: "bancorar-82457",
-        storageBucket: "bancorar-82457.appspot.com",
-        messagingSenderId: "198160041951",
-        appId: "1:198160041951:web:55289ecc1a9a544ca7666a",
-        measurementId: "G-N2NBS51NTK",}
-    firebase.initializeApp(firebaseConfig);
-
-
-
-    // Função para buscar o CNPJ no Firebase
-    function buscarCnpj() {
-      var cnpj = document.getElementById('inputCnpj').value;
-
-      // Referência para o nó 'contratos' no Firebase
-      var ref = firebase.database().ref('contratos');
-
-      // Realiza a busca com o CNPJ como filtro
-      ref.orderByChild('CNPJ').equalTo(cnpj).once('value', function(snapshot) {
-        var tbody = document.getElementById('resultado').getElementsByTagName('tbody')[0];
-        tbody.innerHTML = '';
-
-        if (snapshot.exists()) {
-          var primeiraRazaoSocial = '';
-          var primeiroNomeFantasia = '';
-          snapshot.forEach(function(childSnapshot) {
-            var contrato = childSnapshot.val();
-            if (primeiraRazaoSocial === '') {
-              primeiraRazaoSocial = contrato.Razao_Social;
-              document.getElementById('razaoSocialTitulo').textContent = primeiraRazaoSocial;
-            }
-            if (primeiroNomeFantasia === '') {
-              primeiroNomeFantasia = contrato.Nome_Fantasia;
-              document.getElementById('nomeFantasiaTitulo').textContent = primeiroNomeFantasia;
-            }
-            var row = tbody.insertRow();
-            row.insertCell(0).textContent = contrato.Descricao;
-            row.insertCell(1).textContent = contrato.id_Serie;
-          });
-        } else {
-          document.getElementById('razaoSocialTitulo').textContent = 'Nenhum resultado encontrado';
-          document.getElementById('nomeFantasiaTitulo').textContent = 'Nome Fantasia';
-        }
-      });
-    }
-  </script>
-
+    <h1>Formatação e Limite de CNPJ</h1>
+    <label for="cnpj">CNPJ:</label>
+    <input type="text" id="cnpj" oninput="this.value = formatarCNPJ(this.value); limitarCNPJ(this)">
 </body>
 </html>
